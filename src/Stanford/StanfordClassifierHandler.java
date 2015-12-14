@@ -2,13 +2,16 @@
  * Copyright (c) 2015 Raavana
  */
 package Stanford;
+import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.NERFeatureFactory;
+
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.List;
 import java.util.Properties;
+import java.util.Scanner;
 
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -29,14 +32,16 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap>{
 	public static void main(String[] args) throws IOException {
 		StanfordClassifierHandler demo = new StanfordClassifierHandler();
 		// Training a classifier
-		 demo.train("SinhalaTest.prop",
-		 "train_21_Nov.tsv","Stanford-crf-serialized-new.ser.gz");
+		// demo.train("SinhalaTest.prop","train_21_Nov.tsv","Stanford-crf-serialized-new.ser.gz");
 		
 		//Testing a classifier
-		demo.test("test_21_Nov.tsv", "Stanford-crf-serialized-new.ser.gz");
+		//demo.test("test_21_Nov.tsv", "Stanford-crf-serialized-new.ser.gz");
 		
 		//Advanced 
 		//demo.testAdvanced("test_21_Nov.tsv", "Stanford-crf-serialized-new.ser.gz");
+		
+		//Classify
+		demo.classifySentence("Stanford-crf-serialized-new.ser.gz");
 	}
 
 	/**
@@ -146,5 +151,34 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap>{
 	      outputCalibrationInfo(pw, calibration, correctByBin, calibratedTokens);
 	      pw.flush();
 	    }
+	}
+	
+	public void classifySentence(String classifierName){
+		
+		Scanner keyboard = new Scanner(System.in);
+		String input=null;
+		Properties props = new Properties();
+		props.put("tokenizerFactory", "edu.stanford.nlp.process.WhitespaceTokenizer");
+		props.put("tokenizerOptions", "tokenizeNLs=true");
+		
+		String serializedClassifier = "classifiers/"+classifierName;
+		AbstractSequenceClassifier classifier = null;
+        try {
+	        classifier = CRFClassifier.getClassifier(serializedClassifier, props);
+        } catch (ClassCastException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+        }
+        catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+				
+        System.out.println("Give the input sentence: ");
+        input=keyboard.nextLine();
+		System.out.println(classifier.classifyToString(input, "xml", true));
 	}
 }
