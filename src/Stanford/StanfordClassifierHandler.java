@@ -39,7 +39,7 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap> {
 	public static void main(String[] args) throws IOException {
 		StanfordClassifierHandler demo = new StanfordClassifierHandler();
 		// Training a classifier
-		// demo.train("SinhalaTest.prop","train_21_Nov.tsv","Stanford-crf-serialized-new.ser.gz");
+		demo.train("SinhalaTest.prop","train_21_Nov.tsv","Stanford-crf-serialized-new.ser.gz");
 
 		// Testing a classifier
 		demo.test("test_21_Nov.tsv", "Stanford-crf-serialized-new.ser.gz");
