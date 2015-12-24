@@ -47,10 +47,8 @@ usePrev=true
 useNext=true
 useTags=true
 cacheNGrams=true
-maxNGramLeng=5
+maxNGramLeng=20
 noMidNGrams=true
 
 #useDisjunctive=true
-#useNeighborNGrams=true
-
-gazette= resources/gazetteerOrganization
+useNeighborNGrams=true

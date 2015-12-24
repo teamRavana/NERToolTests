@@ -3,16 +3,15 @@
  */
 package Stanford;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.PrintWriter;
+import java.io.*;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
+import ananya.tools.corpus.partition.PartitionMaker;
+import ananya.tools.corpus.partition.PartitionSet;
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -37,43 +36,60 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap> {
 	public static String[] labelOrder;
 
 	public static void main(String[] args) throws IOException {
+
+        String propertiesFilePath = RESOURCES + "/" + "SinhalaTest.prop";
+        String trainFilePath = "resources/train_21_Nov.tsv";
+        String testFilePath = "resources/test_21_Nov.tsv";
+        String defaultClassifierName = "Stanford-crf-serialized-new.ser.gz";
+
 		StanfordClassifierHandler demo = new StanfordClassifierHandler();
+
 		// Training a classifier
 		demo.train("SinhalaTest.prop","train_21_Nov.tsv","Stanford-crf-serialized-new.ser.gz");
+//        	demo.train(propertiesFilePath,trainFilePath,defaultClassifierName);
 
 		// Testing a classifier
-		demo.test("test_21_Nov.tsv", "Stanford-crf-serialized-new.ser.gz");
+//	    demo.test(testFilePath, defaultClassifierName);
 
 		// Advanced
-		// demo.testAdvanced("test_21_Nov.tsv",
-		// "Stanford-crf-serialized-new.ser.gz");
+//		demo.testAdvanced(testFilePath,defaultClassifierName);
 
 		// Classify
-		// demo.classifySentence("Stanford-crf-serialized-new.ser.gz");
+//		 demo.classifySentence(defaultClassifierName);
+
+		// Cross Validation
+        String inputPath = "input/corpus_tagged";
+        int kValidations = 10;
+        demo.crossValidate(propertiesFilePath,inputPath, kValidations);
+
 	}
 
 	/**
-	 * @param propFile
-	 *            : Name of the Properties file (should be located inside
+	 * @param propFilePath
+	 *            : Path to the Properties file (should be located inside
 	 *            resources directory)
-	 * @param trainFile
-	 *            : Name of the Training data file (should be located inside
-	 *            resources directory)
+	 * @param trainFilePath
+	 *            : Path to the Training data file
 	 *            Output file will be created on classifiers directory
 	 */
-	public void train(String propFile, String trainFile, String serializedClassifierName) {
+	public void train(String propFilePath, String trainFilePath, String serializedClassifierName) {
 		Properties prop = new Properties();
 		InputStream input = null;
 		CRFClassifier classifier;
 
 		try {
-			input = new FileInputStream(RESOURCES + "/" + propFile);
+			input = new FileInputStream(propFilePath);
 
 			// load a properties file from class path, inside static method
 			prop.load(input);
 
 			classifier = new CRFClassifier(prop);
-			classifier.train(RESOURCES + "/" + trainFile);
+			classifier.train(trainFilePath);
+
+            File classifierOutputDir = new File(CLASSIFIERS);
+            if (!classifierOutputDir.exists()) {
+                classifierOutputDir.mkdirs();
+            }
 			classifier.serializeClassifier(CLASSIFIERS + "/" + serializedClassifierName);
 
 		} catch (IOException ex) {
@@ -90,14 +106,13 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap> {
 	}
 
 	/**
-	 * @param testFile
-	 *            : Name of the Testing data file (should be located inside
-	 *            resources directory)
+	 * @param testFilePath
+	 *            : Path to the Testing data file
 	 * @param classifierName
 	 *            : Name of the classifier (should be located inside classifiers
 	 *            directory)
 	 */
-	public void test(String testFile, String classifierName) {
+	public void test(String testFilePath, String classifierName) {
 
 		// output results
 		List<Counter<String>> results;
@@ -107,7 +122,7 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap> {
 
 		Properties props = new Properties();
 		props.put("loadClassifier", CLASSIFIERS + "/" + classifierName);
-		props.put("testFile", RESOURCES + "/" + testFile);
+		props.put("testFile", testFilePath);
 
 		SeqClassifierFlags flags = new SeqClassifierFlags(props);
 		CRFClassifier<CoreLabel> classifier = new CRFClassifier<CoreLabel>(flags);
@@ -116,9 +131,7 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap> {
 		classifier.loadTagIndex();
 		DocumentReaderAndWriter<CoreLabel> readerAndWriter = classifier.defaultReaderAndWriter();
 		ObjectBank<List<CoreLabel>> documents =
-				classifier.makeObjectBankFromFile(RESOURCES + "/" +
-						testFile,
-						readerAndWriter);
+				classifier.makeObjectBankFromFile(testFilePath, readerAndWriter);
 
 		try {
 			// classifier.classifyAndWriteAnswers(RESOURCES + "/" + testFile,
@@ -143,11 +156,11 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap> {
 		}
 	}
 
-	public void testAdvanced(String testFile, String classifierName) {
+	public void testAdvanced(String testFilePath, String classifierName) {
 
 		Properties props = new Properties();
 		props.put("loadClassifier", CLASSIFIERS + "/" + classifierName);
-		props.put("testFile", RESOURCES + "/" + testFile);
+		props.put("testFile", testFilePath);
 
 		SeqClassifierFlags flags = new SeqClassifierFlags(props);
 		CRFClassifier<CoreLabel> classifier = new CRFClassifier<CoreLabel>(flags);
@@ -156,16 +169,16 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap> {
 		classifier.loadTagIndex();
 		DocumentReaderAndWriter<CoreLabel> readerAndWriter = classifier.defaultReaderAndWriter();
 
-		classifier.printProbs(RESOURCES + "/" + testFile, readerAndWriter);
+		classifier.printProbs(testFilePath, readerAndWriter);
 		// probabilities(testFile, classifier.);
 	}
 
-	public void probabilities(String testFile, DocumentReaderAndWriter<CoreMap> readerAndWriter) {
+	public void probabilities(String testFilePath, DocumentReaderAndWriter<CoreMap> readerAndWriter) {
 		Counter<Integer> calibration = new ClassicCounter<>();
 		Counter<Integer> correctByBin = new ClassicCounter<>();
 		TwoDimensionalCounter<Integer, String> calibratedTokens = new TwoDimensionalCounter<>();
 
-		for (List<CoreMap> doc : makeObjectBankFromFile(RESOURCES + "/" + testFile, readerAndWriter)) {
+		for (List<CoreMap> doc : makeObjectBankFromFile(testFilePath, readerAndWriter)) {
 			Triple<Counter<Integer>, Counter<Integer>, TwoDimensionalCounter<Integer, String>> triple =
 					printProbsDocument(doc);
 			if (triple != null) {
@@ -210,6 +223,51 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap> {
 		input = keyboard.nextLine();
 		System.out.println(classifier.classifyToString(input, "xml", true));
 	}
+
+    /**
+     * @param propFilePath
+     *          : Path to the properties file for the classifier
+     * @param inputPath
+     *          : Path to the input directory or the file (ie. tagged files)
+     * @param kValidations
+     *          : K value of k-fold validation (ie: number of paritions)
+     */
+    public void crossValidate(String propFilePath, String inputPath,int kValidations) {
+
+        File input = new File(inputPath);
+        if (!input.exists()){
+            throw new RuntimeException("Input files cannot be found");
+        }
+
+        int crossValidation = kValidations;       // number of folds
+        PartitionMaker partitionMaker = new PartitionMaker();
+
+        // create the k-fold partitions
+        PartitionSet results = partitionMaker.getPartitionedFiles(input,crossValidation);
+
+        List<File> trainFiles = results.getTrainFiles();
+        List<File> testFiles = results.getTestFiles();
+
+        for (int i=0; i<crossValidation; i++){
+
+            String classifierName = "Stanford-crf-serialized-new"+(i+1)+".ser.gz";
+            String trainFilePath = trainFiles.get(i).getPath();
+            String testFilePath = testFiles.get(i).getPath();
+
+            System.out.println("\nValidation Run #"+(i+1));
+            System.out.println("Training with file : "+trainFilePath);
+            System.out.println("Testing with file : "+testFilePath);
+            System.out.println();
+
+            // train the classifier
+            this.train(propFilePath,trainFilePath, classifierName);
+
+            System.out.println("\nTesting #"+(i+1)+"\t with file : "+testFilePath);
+            // test the classifier
+            this.test(testFilePath, classifierName);
+        }
+
+    }
 
 	// Processing Results
 	/**
