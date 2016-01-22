@@ -20,9 +20,10 @@ import java.util.Hashtable;
 			//(new DataStatisticsCalculater()).wordLengthToType();
 			
 			//File writes
-			(new DataStatisticsCalculater()).writeStartingWordsColumn();
-			(new DataStatisticsCalculater()).writeEndingWordsColumn();
-			(new DataStatisticsCalculater()).writeWordLengthColumn(5);
+//			(new DataStatisticsCalculater()).writeStartingWordsColumn();
+//			(new DataStatisticsCalculater()).writeEndingWordsColumn();
+//			(new DataStatisticsCalculater()).writeWordLengthColumn(7);
+			(new DataStatisticsCalculater()).writeWordFrequencyColumn(10);
 
 		}
 		
@@ -312,6 +313,57 @@ import java.util.Hashtable;
 				}
 			}catch (IOException e) {
 				//exception handling left as an exercise for the reader
+			}
+		}
+		
+		//word frequency, writing extra column
+		public void writeWordFrequencyColumn(int cutoff){
+			
+			//read and get count
+			Hashtable<String,Integer> wordCount = new Hashtable<String, Integer>();
+			try (BufferedReader br = new BufferedReader(new FileReader(LOCATION+FILENAME)))
+			{
+				String currentLine;
+				String[] line;
+				int count=0;
+
+				while ((currentLine = br.readLine()) != null) {
+					line = currentLine.split("\\s+");
+					if (wordCount.containsKey(line[0])){
+						count=wordCount.get(line[0]);
+						wordCount.put(line[0], count+1);
+					}
+					else {
+						wordCount.put(line[0], 1);
+					}
+				}
+
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			//write to a file
+			try(PrintWriter out = new PrintWriter(new BufferedWriter(new FileWriter(new File(LOCATION,"Frequency"+cutoff+"_"+FILENAME))))) {
+				try (BufferedReader br = new BufferedReader(new FileReader(LOCATION+FILENAME)))
+				{
+					//rename FILENAME for next iteration
+					FILENAME="Frequency"+cutoff+"_"+FILENAME;
+					String currentLine;
+					String[] line;
+					while ((currentLine = br.readLine()) != null) {
+						line = currentLine.split("\\s+");
+						if (wordCount.get(line[0])<=cutoff){
+							out.println(currentLine+"\t"+1);
+						} else {
+							out.println(currentLine+"\t"+0);
+						}
+						
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}catch (IOException e) {
+			    //exception handling left as an exercise for the reader
 			}
 		}
 	}
