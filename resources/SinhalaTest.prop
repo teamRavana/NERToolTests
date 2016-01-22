@@ -1,5 +1,5 @@
 #location of the training file
-trainFile = train_21_Nov.tsv
+trainFile = sinmin.tsv
 #location where you would like to save (serialize to) your
 #classifier; adding .gz at the end automatically gzips the file,
 #making it faster and smaller
@@ -47,7 +47,7 @@ usePrev=true
 useNext=true
 useTags=true
 cacheNGrams=true
-maxNGramLeng=20
+maxNGramLeng=10
 noMidNGrams=true
 
 #useDisjunctive=true

@@ -10,8 +10,8 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.TreeSet;
 
-import ananya.tools.corpus.partition.PartitionMaker;
-import ananya.tools.corpus.partition.PartitionSet;
+//import ananya.tools.corpus.partition.PartitionMaker;
+//import ananya.tools.corpus.partition.PartitionSet;
 import edu.stanford.nlp.ie.AbstractSequenceClassifier;
 import edu.stanford.nlp.ie.crf.CRFClassifier;
 import edu.stanford.nlp.ling.CoreLabel;
@@ -38,18 +38,18 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap> {
 	public static void main(String[] args) throws IOException {
 
         String propertiesFilePath = RESOURCES + "/" + "SinhalaTest.prop";
-        String trainFilePath = "resources/train_21_Nov.tsv";
-        String testFilePath = "resources/test_21_Nov.tsv";
-        String defaultClassifierName = "Stanford-crf-serialized-new.ser.gz";
+        String trainFilePath = "resources/individualClasses/train_1_person.tsv";
+        String testFilePath = "resources/individualClasses/test_1_person.tsv";
+        String defaultClassifierName = "Stanford-crf-serialized-person.ser.gz";
 
 		StanfordClassifierHandler demo = new StanfordClassifierHandler();
 
 		// Training a classifier
-		demo.train("SinhalaTest.prop","train_21_Nov.tsv","Stanford-crf-serialized-new.ser.gz");
-//        	demo.train(propertiesFilePath,trainFilePath,defaultClassifierName);
+//		demo.train("SinhalaTest.prop","train_21_Nov.tsv","Stanford-crf-serialized-new.ser.gz");
+        demo.train(propertiesFilePath,trainFilePath,defaultClassifierName);
 
 		// Testing a classifier
-//	    demo.test(testFilePath, defaultClassifierName);
+	    demo.test(testFilePath, defaultClassifierName);
 
 		// Advanced
 //		demo.testAdvanced(testFilePath,defaultClassifierName);
@@ -58,9 +58,9 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap> {
 //		 demo.classifySentence(defaultClassifierName);
 
 		// Cross Validation
-        String inputPath = "input/corpus_tagged";
-        int kValidations = 10;
-        demo.crossValidate(propertiesFilePath,inputPath, kValidations);
+//        String inputPath = "input/corpus_tagged";
+//        int kValidations = 10;
+//        demo.crossValidate(propertiesFilePath,inputPath, kValidations);
 
 	}
 
@@ -232,42 +232,42 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap> {
      * @param kValidations
      *          : K value of k-fold validation (ie: number of paritions)
      */
-    public void crossValidate(String propFilePath, String inputPath,int kValidations) {
-
-        File input = new File(inputPath);
-        if (!input.exists()){
-            throw new RuntimeException("Input files cannot be found");
-        }
-
-        int crossValidation = kValidations;       // number of folds
-        PartitionMaker partitionMaker = new PartitionMaker();
-
-        // create the k-fold partitions
-        PartitionSet results = partitionMaker.getPartitionedFiles(input,crossValidation);
-
-        List<File> trainFiles = results.getTrainFiles();
-        List<File> testFiles = results.getTestFiles();
-
-        for (int i=0; i<crossValidation; i++){
-
-            String classifierName = "Stanford-crf-serialized-new"+(i+1)+".ser.gz";
-            String trainFilePath = trainFiles.get(i).getPath();
-            String testFilePath = testFiles.get(i).getPath();
-
-            System.out.println("\nValidation Run #"+(i+1));
-            System.out.println("Training with file : "+trainFilePath);
-            System.out.println("Testing with file : "+testFilePath);
-            System.out.println();
-
-            // train the classifier
-            this.train(propFilePath,trainFilePath, classifierName);
-
-            System.out.println("\nTesting #"+(i+1)+"\t with file : "+testFilePath);
-            // test the classifier
-            this.test(testFilePath, classifierName);
-        }
-
-    }
+//    public void crossValidate(String propFilePath, String inputPath,int kValidations) {
+//
+//        File input = new File(inputPath);
+//        if (!input.exists()){
+//            throw new RuntimeException("Input files cannot be found");
+//        }
+//
+//        int crossValidation = kValidations;       // number of folds
+//        PartitionMaker partitionMaker = new PartitionMaker();
+//
+//        // create the k-fold partitions
+//        PartitionSet results = partitionMaker.getPartitionedFiles(input,crossValidation);
+//
+//        List<File> trainFiles = results.getTrainFiles();
+//        List<File> testFiles = results.getTestFiles();
+//
+//        for (int i=0; i<crossValidation; i++){
+//
+//            String classifierName = "Stanford-crf-serialized-new"+(i+1)+".ser.gz";
+//            String trainFilePath = trainFiles.get(i).getPath();
+//            String testFilePath = testFiles.get(i).getPath();
+//
+//            System.out.println("\nValidation Run #"+(i+1));
+//            System.out.println("Training with file : "+trainFilePath);
+//            System.out.println("Testing with file : "+testFilePath);
+//            System.out.println();
+//
+//            // train the classifier
+//            this.train(propFilePath,trainFilePath, classifierName);
+//
+//            System.out.println("\nTesting #"+(i+1)+"\t with file : "+testFilePath);
+//            // test the classifier
+//            this.test(testFilePath, classifierName);
+//        }
+//
+//    }
 
 	// Processing Results
 	/**
