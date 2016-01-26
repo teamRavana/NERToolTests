@@ -20,10 +20,10 @@ import java.util.Hashtable;
 			//(new DataStatisticsCalculater()).wordLengthToType();
 			
 			//File writes
-//			(new DataStatisticsCalculater()).writeStartingWordsColumn();
-//			(new DataStatisticsCalculater()).writeEndingWordsColumn();
-//			(new DataStatisticsCalculater()).writeWordLengthColumn(7);
-			(new DataStatisticsCalculater()).writeWordFrequencyColumn(10);
+			(new DataStatisticsCalculater()).writeStartingWordsColumn();
+			(new DataStatisticsCalculater()).writeEndingWordsColumn();
+			(new DataStatisticsCalculater()).writeWordLengthColumn(7);
+//			(new DataStatisticsCalculater()).writeWordFrequencyColumn(10);
 
 		}
 		
@@ -261,7 +261,7 @@ import java.util.Hashtable;
 					FILENAME="StartWord_"+FILENAME;
 					String sCurrentLine;
 					String prevChar=".";
-					String prevLine=br.readLine();
+					//String prevLine=br.readLine();
 					String[] line;
 
 					while ((sCurrentLine = br.readLine()) != null) {
