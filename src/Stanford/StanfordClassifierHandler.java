@@ -38,8 +38,8 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap> {
 	public static void main(String[] args) throws IOException {
 
         String propertiesFilePath = RESOURCES + "/" + "SinhalaTest.prop";
-        String trainFilePath = "resources/individualClasses/train_1_person.tsv";
-        String testFilePath = "resources/individualClasses/test_1_person.tsv";
+        String trainFilePath = "resources/train_21_Nov.tsv";
+        String testFilePath = "resources/test_21_Nov.tsv";
         String defaultClassifierName = "Stanford-crf-serialized-person.ser.gz";
 
 		StanfordClassifierHandler demo = new StanfordClassifierHandler();
@@ -55,7 +55,7 @@ public class StanfordClassifierHandler extends CRFClassifier<CoreMap> {
 //		demo.testAdvanced(testFilePath,defaultClassifierName);
 
 		// Classify
-//		 demo.classifySentence(defaultClassifierName);
+		 demo.classifySentence(defaultClassifierName);
 
 		// Cross Validation
 //        String inputPath = "input/corpus_tagged";
